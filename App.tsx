@@ -50,10 +50,17 @@ const App: React.FC = () => {
     } catch (error: any) {
       console.error("Failed to fetch response:", error);
       
+      let errorText = "I encountered an error. Please try again later.";
+      if (error.message === "API_KEY_MISSING") {
+        errorText = "API Key is missing. Please set the API_KEY environment variable in your Vercel project settings.";
+      } else if (error.message.includes("429")) {
+        errorText = "Too many requests. Please wait a moment before asking again.";
+      }
+
       const fallbackMsg: ChatMessage = {
         id: (Date.now() + 2).toString(),
         role: MessageRole.MODEL,
-        text: "I am sorry, I encountered an error. Please check your connection and try again.",
+        text: errorText,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, fallbackMsg]);
@@ -82,7 +89,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50 text-slate-900 overflow-hidden relative font-sans">
-      {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-blue-100 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-tr from-blue-700 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200 transform rotate-3">
@@ -101,7 +107,6 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          {/* Theme Selector */}
           <div className="relative">
             <button 
               onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
@@ -140,7 +145,6 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Chat Area */}
       <main 
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 scrollbar-hide bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')] bg-fixed"
@@ -158,7 +162,6 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Input Area */}
       <footer className="bg-white border-t border-blue-50 p-4 md:p-8 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-4 items-end">

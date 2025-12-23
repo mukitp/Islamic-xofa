@@ -48,22 +48,19 @@ const App: React.FC = () => {
       };
       setMessages(prev => [...prev, botMsg]);
     } catch (error: any) {
-      console.error("Failed to fetch response:", error);
+      let errorMessage = "Sorry, I am having trouble connecting. Please check your internet or API settings.";
       
-      let errorText = "I encountered an error. Please try again later.";
       if (error.message === "API_KEY_MISSING") {
-        errorText = "API Key is missing. Please set the API_KEY environment variable in your Vercel project settings.";
-      } else if (error.message.includes("429")) {
-        errorText = "Too many requests. Please wait a moment before asking again.";
+        errorMessage = "API Key not found. Please make sure you have added the API_KEY to your project settings and redeployed.";
       }
 
-      const fallbackMsg: ChatMessage = {
+      const errorMsg: ChatMessage = {
         id: (Date.now() + 2).toString(),
         role: MessageRole.MODEL,
-        text: errorText,
+        text: errorMessage,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, fallbackMsg]);
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +71,6 @@ const App: React.FC = () => {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const handleSelectSuggestion = (suggestion: string) => {
-    handleSend(suggestion);
   };
 
   const themes: { id: AppTheme, label: string, color: string }[] = [
@@ -119,7 +112,7 @@ const App: React.FC = () => {
             {isThemeMenuOpen && (
               <div className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-2xl border border-blue-50 p-2 z-30 animate-in fade-in zoom-in duration-200 origin-top-right">
                 <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">
-                  Select Visual Style
+                  Styles
                 </div>
                 {themes.map((t) => (
                   <button
@@ -139,8 +132,8 @@ const App: React.FC = () => {
           </div>
 
           <div className="hidden md:flex flex-col items-end">
-            <span className="text-xs text-blue-900 font-bold tracking-tight">MUKIT SARKER</span>
-            <span className="text-[10px] text-slate-400 italic">Chief Architect</span>
+            <span className="text-xs text-blue-900 font-bold tracking-tight uppercase">Mukit Sarker</span>
+            <span className="text-[10px] text-slate-400 italic">Creator</span>
           </div>
         </div>
       </header>
@@ -151,7 +144,7 @@ const App: React.FC = () => {
         onClick={() => setIsThemeMenuOpen(false)}
       >
         {messages.length === 0 ? (
-          <WelcomeScreen onSelectSuggestion={handleSelectSuggestion} />
+          <WelcomeScreen onSelectSuggestion={(s) => handleSend(s)} />
         ) : (
           <div className="max-w-4xl mx-auto w-full">
             {messages.map((msg) => (
@@ -162,7 +155,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <footer className="bg-white border-t border-blue-50 p-4 md:p-8 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
+      <footer className="bg-white border-t border-blue-50 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-4 items-end">
             <div className="flex-1 relative group">
@@ -170,42 +163,28 @@ const App: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Ask your question..."
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] px-6 py-4 pr-14 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none max-h-48 text-slate-700 text-base leading-relaxed shadow-inner"
-                rows={input.split('\n').length > 1 ? Math.min(input.split('\n').length, 8) : 1}
+                placeholder="Ask Xofa anything..."
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] px-6 py-4 pr-14 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none max-h-48 text-slate-700 shadow-inner"
+                rows={1}
               />
-              <div className="absolute right-4 bottom-4 text-slate-300 pointer-events-none group-focus-within:text-blue-200 transition-colors">
-                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
-              </div>
             </div>
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
               className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all shadow-xl active:scale-90 ${
                 !input.trim() || isLoading 
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                  : `bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-blue-200 hover:shadow-2xl hover:-translate-y-1`
+                  ? 'bg-slate-100 text-slate-400' 
+                  : `bg-blue-600 text-white shadow-blue-200 hover:-translate-y-1`
               }`}
-              style={{
-                background: theme === 'midnight' ? '#1e293b' : theme === 'sky' ? '#60a5fa' : theme === 'ocean' ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : undefined
-              }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
             </button>
           </div>
-          <div className="flex justify-between items-center mt-4 px-2">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
-              Xofa Intelligence &middot; {theme.toUpperCase()} MODE
-            </p>
-            <div className="flex gap-4">
-               <span className="text-[10px] text-blue-900/40 font-bold tracking-widest uppercase">Ethics First</span>
-               <span className="text-[10px] text-blue-900/40 font-bold tracking-widest uppercase">Ad-Free</span>
-            </div>
-          </div>
+          <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-[0.2em] font-bold">
+            Built by Mukit Sarker &middot; Xofa AI
+          </p>
         </div>
       </footer>
     </div>

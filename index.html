@@ -31,6 +31,10 @@
             scrollbar-width: none;
         }
     </style>
+<script>
+    // Shim for process.env to prevent ReferenceError in browser
+    window.process = { env: { API_KEY: "" } };
+</script>
 <script type="importmap">
 {
   "imports": {
@@ -44,5 +48,7 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- Entry point script -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
